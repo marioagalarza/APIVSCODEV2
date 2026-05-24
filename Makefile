@@ -11,8 +11,8 @@ build:
 test:
 	./mvnw test
 
-run: build
-	SPRING_PROFILES_ACTIVE=local java -jar $(JAR)
+run:
+	./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 
 docker-build:
 	docker build -t $(IMAGE):local .
