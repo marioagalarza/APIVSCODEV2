@@ -9,4 +9,27 @@ services:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: local
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: apivscodev2_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: apivscodev2
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d apivscodev2"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

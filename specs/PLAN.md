@@ -41,10 +41,60 @@
 
 ## Fase 6 — Pipeline CI/CD
 
-- [x] Definir pipeline de CI (build + test)
-- [x] Definir pipeline de CD (build image → push → deploy)
-- [x] Configurar variables de entorno por ambiente en el orquestador
-- [x] Documentar proceso de promoción NPE → UAT → PROD
+- [ ] Definir pipeline de CI con GitHub Actions (build + test)
+- [ ] Definir pipeline de CD (build image → push → deploy)
+- [ ] Configurar variables de entorno por ambiente en el orquestador
+- [ ] Documentar proceso de promoción NPE → UAT → PROD
+
+## Fase 7 — PostgreSQL
+
+- [x] Agregar `spring-boot-starter-data-jpa` y driver PostgreSQL al `pom.xml`
+- [x] Agregar servicio `postgres` en `docker-compose.yml` con healthcheck
+- [x] Configurar `depends_on` con `condition: service_healthy` en el servicio `app`
+- [x] Configurar datasource en cada `application-{env}.yml`
+- [x] Agregar targets `db-up`, `db-down`, `db-logs`, `db-shell` al `Makefile`
+- [x] Verificar conexión vía `GET /api/v1/db-health`
+- [x] Actualizar `specs/DATABASE.md` con estado actual
+- [ ] Agregar dependencia Flyway al `pom.xml`
+- [ ] Crear carpeta `src/main/resources/db/migration/`
+- [ ] Escribir migración `V1__init.sql`
+
+## Fase 8 — Spring Security + JWT
+
+- [ ] Agregar `spring-boot-starter-security` al `pom.xml`
+- [ ] Agregar dependencia `jjwt` (io.jsonwebtoken)
+- [ ] Crear migración `V2__create_users.sql`
+- [ ] Crear entidad `User` con roles
+- [ ] Implementar `UserDetailsService` con carga desde BD
+- [ ] Crear `JwtService` (generación y validación de tokens)
+- [ ] Crear `JwtAuthenticationFilter`
+- [ ] Configurar `SecurityFilterChain` (rutas públicas vs protegidas)
+- [ ] Implementar `POST /api/v1/auth/register`
+- [ ] Implementar `POST /api/v1/auth/login`
+- [ ] Proteger `GET /api/v1/hello` con autenticación JWT
+- [ ] Actualizar `specs/API.md` con nuevos endpoints
+- [ ] Escribir tests de integración para flujo auth completo
+
+## Fase 9 — GitHub Actions CI/CD
+
+- [ ] Crear `.github/workflows/ci.yml` (build + test en cada PR)
+- [ ] Crear `.github/workflows/cd.yml` (build image → push a registry)
+- [ ] Configurar secrets en GitHub (credenciales de registry, ambientes)
+- [ ] Configurar variables por ambiente (NPE, UAT, PROD)
+- [ ] Documentar proceso de promoción NPE → UAT → PROD
+- [ ] Actualizar `specs/DEPLOYMENT.md`
+
+## Fase 10 — BDD con Cucumber
+
+- [ ] Agregar dependencias Cucumber al `pom.xml` (cucumber-spring, cucumber-junit-platform)
+- [ ] Crear estructura `src/test/resources/features/`
+- [ ] Escribir feature `hello.feature` como caso base
+- [ ] Escribir feature `auth.feature` para flujo de autenticación
+- [ ] Implementar step definitions
+- [ ] Integrar ejecución de Cucumber en el ciclo Maven (`mvn test`)
+- [ ] Configurar reporte HTML de Cucumber
+
+---
 
 ## Deuda técnica / Backlog
 
@@ -52,3 +102,4 @@
 - [ ] Centralizar manejo de errores con `@ControllerAdvice`
 - [ ] Agregar logging estructurado (JSON) para ambientes no-local
 - [ ] Configurar rate limiting
+- [ ] Incorporar Testcontainers para tests de integración con BD real

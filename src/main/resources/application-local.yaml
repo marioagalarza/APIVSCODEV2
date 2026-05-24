@@ -2,6 +2,14 @@ spring:
   config:
     activate:
       on-profile: local
+  datasource:
+    url: jdbc:postgresql://localhost:5432/apivscodev2
+    username: appuser
+    password: apppassword
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
 
 server:
   port: 8080

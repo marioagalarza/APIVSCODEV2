@@ -3,3 +3,10 @@ spring:
     name: apivscodev2
   profiles:
     active: local
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
