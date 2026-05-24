@@ -1,0 +1,16 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+server:
+  port: 8080
+  tomcat:
+    max-threads: 200
+
+logging:
+  level:
+    root: WARN
+    ar.com.marete: WARN
+  pattern:
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss}","level":"%level","logger":"%logger{36}","message":"%msg","trace":"%X{traceId}"}%n'

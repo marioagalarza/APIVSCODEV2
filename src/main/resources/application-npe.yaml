@@ -1,0 +1,14 @@
+spring:
+  config:
+    activate:
+      on-profile: npe
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    ar.com.marete: INFO
+  pattern:
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss}","level":"%level","logger":"%logger{36}","message":"%msg"}%n'

@@ -1,0 +1,125 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*.*.*"
+
+env:
+  REGISTRY: registry.marete.com.ar
+  IMAGE: registry.marete.com.ar/apivscodev2
+
+jobs:
+  deploy-npe:
+    name: Deploy to NPE
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: temurin
+          cache: maven
+
+      - name: Build JAR
+        run: ./mvnw package -DskipTests -q
+
+      - name: Login to registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE }}:latest
+
+      - name: Deploy to NPE
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.NPE_DEPLOY_HOST }}
+          username: deploy
+          key: ${{ secrets.NPE_DEPLOY_KEY }}
+          script: |
+            docker pull ${{ env.IMAGE }}:latest
+            docker stop apivscodev2_npe || true
+            docker rm apivscodev2_npe || true
+            docker run -d \
+              --name apivscodev2_npe \
+              --restart unless-stopped \
+              -p 8080:8080 \
+              -e SPRING_PROFILES_ACTIVE=npe \
+              ${{ env.IMAGE }}:latest
+
+  deploy-prod:
+    name: Deploy to PROD
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: temurin
+          cache: maven
+
+      - name: Build JAR
+        run: ./mvnw package -DskipTests -q
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Login to registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ steps.version.outputs.VERSION }}
+            ${{ env.IMAGE }}:prod
+
+      - name: Deploy to PROD
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.PROD_DEPLOY_HOST }}
+          username: deploy
+          key: ${{ secrets.PROD_DEPLOY_KEY }}
+          script: |
+            docker pull ${{ env.IMAGE }}:${{ steps.version.outputs.VERSION }}
+            docker stop apivscodev2_prod || true
+            docker rm apivscodev2_prod || true
+            docker run -d \
+              --name apivscodev2_prod \
+              --restart unless-stopped \
+              -p 8080:8080 \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              ${{ env.IMAGE }}:${{ steps.version.outputs.VERSION }}
+
+      - name: Smoke test
+        run: |
+          sleep 15
+          curl -sf https://api.marete.com.ar/api/v1/hello | grep -q "message" \
+            && echo "Smoke test OK" || (echo "Smoke test FALLO" && exit 1)

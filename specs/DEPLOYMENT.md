@@ -162,6 +162,29 @@ docker compose up -d
 
 ---
 
+## GitHub Actions — Secrets requeridos
+
+Configurar en **Settings → Secrets and variables → Actions** del repositorio:
+
+| Secret | Descripción |
+|---|---|
+| `REGISTRY_USER` | Usuario con permisos de push en `registry.marete.com.ar` |
+| `REGISTRY_PASSWORD` | Password o token del registry Docker |
+| `NPE_DEPLOY_HOST` | IP o hostname del servidor NPE |
+| `NPE_DEPLOY_KEY` | Clave SSH privada del usuario `deploy` en NPE |
+| `PROD_DEPLOY_HOST` | IP o hostname del servidor PROD |
+| `PROD_DEPLOY_KEY` | Clave SSH privada del usuario `deploy` en PROD |
+
+### Flujo de triggers
+
+| Evento | Pipeline | Destino |
+|---|---|---|
+| Push a cualquier rama o PR | `ci.yml` — build + test | — |
+| Merge a `main` | `cd.yml` — job `deploy-npe` | NPE con `SPRING_PROFILES_ACTIVE=npe` |
+| Push de tag `v*.*.*` | `cd.yml` — job `deploy-prod` | PROD con `SPRING_PROFILES_ACTIVE=prod` + smoke test |
+
+---
+
 ## Checklist de despliegue
 
 - [ ] Crear `Dockerfile` en la raíz del proyecto
