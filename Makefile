@@ -12,7 +12,7 @@ test:
 	./mvnw test
 
 run:
-	./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+	./mvnw spring-boot:run -Dspring-boot.run.profiles=local -Dspring-boot.run.jvmArguments="-Dserver.port=8082"
 
 docker-build:
 	docker build -t $(IMAGE):local .
